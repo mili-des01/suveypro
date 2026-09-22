@@ -140,7 +140,7 @@ const Booking = {
     list.innerHTML = this.files.map((f, i) => `
       <div class="file-item">
         ${Icons.svg('file-text')}
-        <span>${UI.esc(f.name)}</span>
+        <span class="file-name">${UI.esc(f.name)}</span>
         <span class="file-size">${UI.formatBytes(f.size)}</span>
         <button type="button" class="file-remove" aria-label="Remove ${UI.esc(f.name)}" data-index="${i}">${Icons.svg('x')}</button>
       </div>`).join('');
