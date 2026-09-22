@@ -69,7 +69,8 @@
       </div>
       <div class="footer-bottom">
         <span>© <span id="footer-year">2026</span> SurveyPro. All rights reserved.</span>
-        <span>Licensed Land Surveyors</span>
+        <a href="/admin/login.html" class="footer-admin-link" aria-label="Staff login">Licensed Land Surveyors</a>
+        
       </div>
     </div>
   </footer>`;
