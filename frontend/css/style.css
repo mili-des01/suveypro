@@ -61,6 +61,15 @@ a:hover { color: var(--sand); }
 
 :focus-visible { outline: 2px solid var(--sand); outline-offset: 2px; }
 
+/* Inline feature/list icons — Lucide SVGs have no intrinsic size, so any
+   <i data-lucide> rendered inline must be sized explicitly or it blows up
+   to the container width. This default keeps every list/badge icon small. */
+i[data-rendered], svg[data-inline-icon], .check-list svg { width: 17px; height: 17px; flex: none; }
+
+.check-list { list-style: none; padding: 0; display: grid; gap: 12px; margin: 22px 0 0; }
+.check-list li { display: flex; gap: 10px; align-items: center; }
+.check-list svg { color: var(--success); }
+
 /* ── Layout ── */
 .container { max-width: var(--max-w); margin: 0 auto; padding-inline: var(--pad-desktop); }
 .section { padding-block: var(--section-desktop); }

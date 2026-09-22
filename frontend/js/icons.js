@@ -70,7 +70,7 @@
     (root || document).querySelectorAll('i[data-lucide]:not([data-rendered])').forEach((el) => {
       const name = el.getAttribute('data-lucide');
       el.setAttribute('data-rendered', '1');
-      el.outerHTML = iconSvg(name, el.className && el.className !== 'undefined' ? el.className : '');
+      el.outerHTML = iconSvg(name, (el.className && el.className !== 'undefined' ? el.className + ' ' : '') + 'data-inline-icon');
     });
   }
 
