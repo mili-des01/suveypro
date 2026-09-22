@@ -33,7 +33,7 @@ const Booking = {
   },
 
   async loadServices() {
-    const select = document.getElementById('booking-service');
+    const select = document.getElementById('bf-service');
     if (!select) return;
     try {
       const res = await API.get('/services');
@@ -172,7 +172,7 @@ const Booking = {
     const box = document.getElementById('review-summary');
     if (!box) return;
     const d = this.collect();
-    const serviceName = document.querySelector(`#booking-service option[value="${d.serviceId}"]`)?.textContent || '—';
+    const serviceName = document.querySelector(`#bf-service option[value="${d.serviceId}"]`)?.textContent || '—';
     const rows = [
       ['Full Name', d.fullName], ['Email', d.email], ['Phone', d.phone],
       ['Service', serviceName], ['Property Address', d.propertyAddress], ['City / Area', d.city],
