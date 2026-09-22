@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recent Jobs | SurveyPro Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <script defer src="/js/icons.js"></script>
+  <script defer src="/js/api.js"></script>
+  <script defer src="/js/ui.js"></script>
+  <script defer src="/js/admin.js"></script>
+</head>
+<body>
+  <div class="admin-topbar">
+    <div class="topbar-left"><h1>Recent Jobs</h1></div>
+    <div class="topbar-actions">
+      <button class="btn btn--sm btn--primary" id="new-job">New Job</button>
+    </div>
+  </div>
+  <div class="admin-content">
+    <div class="panel">
+      <div id="jobs-table" style="padding:22px;"></div>
+      <div class="pagination" id="jobs-pagination" style="padding-bottom:20px;"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+      if (!(await Admin.renderShell('recent-jobs', 'Recent Jobs'))) return;
+
+      const state = { page: 1 };
+      const tableEl = document.getElementById('jobs-table');
+      let services = [];
+
+      try { services = (await API.get('/services')).data; } catch { /* non-fatal */ }
+
+      function jobForm(job) {
+        return `
+          <form id="job-form" novalidate>
+            <div class="form-grid">
+              <div class="field span-2">
+                <label>Job Title <span class="required">*</span></label>
+                <input name="title" type="text" required maxlength="180" value="${UI.esc(job ? job.title : '')}">
+              </div>
+              <div class="field">
+                <label>Location</label>
+                <input name="location" type="text" maxlength="180" value="${UI.esc(job ? job.location || '' : '')}">
+              </div>
+              <div class="field">
+                <label>Service</label>
+                <select name="serviceId">
+                  <option value="">—</option>
+                  ${services.map((s) => `<option value="${s.id}" ${job && job.serviceId === s.id ? 'selected' : ''}>${UI.esc(s.name)}</option>`).join('')}
+                </select>
+              </div>
+              <div class="field">
+                <label>Job Date</label>
+                <input name="jobDate" type="date" value="${job && job.jobDate ? String(job.jobDate).slice(0, 10) : ''}">
+              </div>
+              <div class="field">
+                <label>Cover Image</label>
+                <input name="coverImage" type="file" accept="image/*">
+              </div>
+              <div class="field span-2">
+                <label>Description</label>
+                <textarea name="description">${UI.esc(job ? job.description || '' : '')}</textarea>
+              </div>
+              <div class="field span-2">
+                <label style="display:flex;gap:10px;align-items:center;">
+                  <input type="checkbox" name="published" style="width:17px;height:17px;accent-color:var(--navy);" ${!job || job.published ? 'checked' : ''}> Published
+                </label>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn--outline" data-close>Cancel</button>
+              <button class="btn btn--primary" type="submit">Save Job</button>
+            </div>
+          </form>`;
+      }
+
+      function openForm(job) {
+        const { overlay, close } = Admin.openModal(job ? 'Edit Job' : 'New Job', jobForm(job), { wide: true });
+        overlay.querySelector('[data-close]').onclick = close;
+        const form = overlay.querySelector('#job-form');
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const btn = form.querySelector('button[type="submit"]');
+          UI.setBusy(btn, true, 'Saving…');
+          const fd = new FormData();
+          fd.append('title', form.title.value.trim());
+          fd.append('location', form.location.value.trim());
+          fd.append('serviceId', form.serviceId.value);
+          if (form.jobDate.value) fd.append('jobDate', form.jobDate.value);
+          fd.append('description', form.description.value);
+          fd.append('published', form.published.checked);
+          const cover = form.coverImage.files[0];
+          if (cover) fd.append('coverImage', cover);
+          try {
+            if (job) await API.patchForm(`/recent-jobs/${job.id}`, fd);
+            else await API.postForm('/recent-jobs', fd);
+            UI.toast('Job saved.', 'success');
+            close();
+            load();
+          } catch (err) { UI.setBusy(btn, false); UI.toast(err.message, 'error'); }
+        });
+      }
+
+      async function load() {
+        tableEl.innerHTML = UI.loadingBlock('Loading recent jobs…');
+        const params = new URLSearchParams({ page: state.page, limit: 12 });
+        try {
+          const res = await API.get(`/recent-jobs?${params}`);
+          tableEl.innerHTML = Admin.table(
+            [
+              { label: 'Job', render: (j) => `
+                <div style="display:flex;gap:12px;align-items:center;">
+                  <img src="${UI.esc(j.coverImageUrl || '/assets/images/illustrations/recent-job.svg')}" alt="" style="width:56px;height:40px;object-fit:cover;border-radius:5px;flex:none;">
+                  <div><strong style="color:var(--navy);display:block;">${UI.esc(j.title)}</strong>
+                  <span style="font-size:.8rem;color:var(--gray);">${UI.esc(j.location || '—')}</span></div>
+                </div>` },
+              { label: 'Service', render: (j) => UI.esc(j.serviceName || '—') },
+              { label: 'Date', render: (j) => UI.formatDate(j.jobDate) },
+              { label: 'Status', render: (j) => UI.statusBadge(j.published ? 'published' : 'draft') },
+              { label: 'Actions', right: true, render: (j) => `
+                <div class="table-actions">
+                  <button class="btn btn--sm btn--outline" data-edit="${j.id}">${Icons.svg('pencil')}<span>Edit</span></button>
+                  <button class="btn btn--sm btn--outline" data-toggle="${j.id}" data-published="${j.published}">${j.published ? 'Unpublish' : 'Publish'}</button>
+                  <button class="btn btn--sm btn--danger" data-del="${j.id}" data-title="${UI.esc(j.title)}">${Icons.svg('trash')}</button>
+                </div>` }
+            ],
+            res.data,
+            { emptyTitle: 'No recent jobs', emptyMessage: 'Add a job to showcase recent field work.', emptyIcon: 'map' }
+          );
+          Icons.render(tableEl);
+          UI.renderPagination(document.getElementById('jobs-pagination'), res, (p) => { state.page = p; load(); });
+
+          const byId = (id) => res.data.find((j) => String(j.id) === String(id));
+          tableEl.querySelectorAll('[data-edit]').forEach((btn) => btn.addEventListener('click', () => openForm(byId(btn.dataset.edit))));
+          tableEl.querySelectorAll('[data-toggle]').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+              try {
+                await API.patch(`/recent-jobs/${btn.dataset.toggle}`, { published: btn.dataset.published !== 'true' });
+                UI.toast('Job updated.', 'success');
+                load();
+              } catch (err) { UI.toast(err.message, 'error'); }
+            });
+          });
+          tableEl.querySelectorAll('[data-del]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              Admin.confirmDialog(`Delete job "${btn.dataset.title}"?`, async () => {
+                try { await API.del(`/recent-jobs/${btn.dataset.del}`); UI.toast('Job deleted.', 'success'); load(); }
+                catch (err) { UI.toast(err.message, 'error'); }
+              });
+            });
+          });
+        } catch (err) {
+          tableEl.innerHTML = UI.emptyState('Unable to load recent jobs', err.message, 'alert-triangle');
+        }
+      }
+
+      document.getElementById('new-job').addEventListener('click', () => openForm(null));
+      load();
+    });
+  </script>
+</body>
+</html>

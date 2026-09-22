@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login | SurveyPro</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <script defer src="/js/icons.js"></script>
+  <script defer src="/js/api.js"></script>
+  <script defer src="/js/ui.js"></script>
+</head>
+<body>
+  <div class="login-page">
+    <div class="login-card">
+      <a class="logo" href="/">
+        <img class="logo-mark" src="/assets/logos/logo.svg" alt="">
+        <span class="logo-text">Survey<span>Pro</span></span>
+      </a>
+      <p class="login-sub">Sign in to the management dashboard</p>
+
+      <form id="login-form" novalidate>
+        <div class="field" style="margin-bottom:16px;">
+          <label for="login-email">Email</label>
+          <input id="login-email" name="email" type="email" autocomplete="email" required>
+        </div>
+        <div class="field" style="margin-bottom:22px;">
+          <label for="login-password">Password</label>
+          <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="btn btn--primary btn--block" type="submit" id="login-btn">Sign In</button>
+      </form>
+
+      <p class="login-footer">Protected area · Authorized staff only</p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      Icons.render();
+      const form = document.getElementById('login-form');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        UI.clearFieldErrors(form);
+        const btn = document.getElementById('login-btn');
+        UI.setBusy(btn, true, 'Signing in…');
+        try {
+          await API.post('/auth/login', {
+            email: form.email.value.trim(),
+            password: form.password.value
+          });
+          window.location.href = '/admin/dashboard.html';
+        } catch (err) {
+          UI.setBusy(btn, false);
+          UI.formAlert(form, err.message || 'Invalid email or password.', 'error');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

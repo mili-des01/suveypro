@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" fill="none">
+  <rect width="640" height="400" fill="#22384a"/>
+  <path d="M0 290 L160 240 L340 285 L500 225 L640 265 V400 H0 Z" fill="#1d3040"/>
+  <!-- commercial building outline -->
+  <g fill="none" stroke="#F7F7F4" stroke-width="3">
+    <rect x="150" y="90" width="200" height="160" rx="4"/>
+    <rect x="380" y="130" width="120" height="120" rx="4"/>
+  </g>
+  <!-- staking grid -->
+  <g stroke="#C7A56A" stroke-width="2" stroke-opacity=".8">
+    <path d="M150 130 h200 M150 170 h200 M210 90 v160 M270 90 v160 M330 90 v160"/>
+  </g>
+  <g fill="#C7A56A">
+    <rect x="146" y="246" width="8" height="16" rx="2"/>
+    <rect x="306" y="246" width="8" height="16" rx="2"/>
+    <rect x="436" y="246" width="8" height="16" rx="2"/>
+  </g>
+  <g stroke="#F7F7F4" stroke-width="4">
+    <path d="M560 250 v60" stroke-linecap="round"/>
+  </g>
+  <circle cx="560" cy="242" r="9" fill="#C7A56A"/>
+  <path d="M60 340 h520" stroke="#C7A56A" stroke-width="3" stroke-dasharray="10 8"/>
+</svg>

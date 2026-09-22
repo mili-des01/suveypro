@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Form | SurveyPro Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <script defer src="/js/icons.js"></script>
+  <script defer src="/js/api.js"></script>
+  <script defer src="/js/ui.js"></script>
+  <script defer src="/js/admin.js"></script>
+</head>
+<body>
+  <div class="admin-topbar">
+    <div class="topbar-left">
+      <a class="icon-btn" href="projects.html" aria-label="Back to projects"><i data-lucide="chevron-left"></i></a>
+      <h1 id="form-title">New Project</h1>
+    </div>
+  </div>
+  <div class="admin-content" style="max-width:860px;">
+    <form class="form-card" id="project-form" novalidate>
+      <div class="form-grid">
+        <div class="field span-2">
+          <label for="pf-title">Project Title <span class="required">*</span></label>
+          <input id="pf-title" name="title" type="text" required maxlength="180">
+        </div>
+        <div class="field">
+          <label for="pf-category">Category <span class="required">*</span></label>
+          <select id="pf-category" name="category" required>
+            <option value="">Select…</option>
+            <option value="residential">Residential</option>
+            <option value="commercial">Commercial</option>
+            <option value="construction">Construction</option>
+            <option value="land_development">Land Development</option>
+            <option value="topographical">Topographical</option>
+            <option value="boundary">Boundary</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="pf-location">Location</label>
+          <input id="pf-location" name="location" type="text" maxlength="180">
+        </div>
+        <div class="field">
+          <label for="pf-date">Completion Date</label>
+          <input id="pf-date" name="completionDate" type="date">
+        </div>
+        <div class="field">
+          <label for="pf-services">Services Provided <span class="hint">(comma separated)</span></label>
+          <input id="pf-services" name="services" type="text" placeholder="Boundary Survey, Topographical Survey">
+        </div>
+        <div class="field span-2">
+          <label for="pf-description">Overview</label>
+          <textarea id="pf-description" name="description"></textarea>
+        </div>
+        <div class="field">
+          <label for="pf-challenge">The Challenge</label>
+          <textarea id="pf-challenge" name="challenge"></textarea>
+        </div>
+        <div class="field">
+          <label for="pf-approach">Our Approach</label>
+          <textarea id="pf-approach" name="approach"></textarea>
+        </div>
+        <div class="field span-2">
+          <label for="pf-result">The Result</label>
+          <textarea id="pf-result" name="result"></textarea>
+        </div>
+        <div class="field span-2">
+          <label for="pf-cover">Cover Image</label>
+          <input id="pf-cover" name="coverImage" type="file" accept="image/*">
+          <img id="pf-cover-preview" alt="" style="display:none;margin-top:10px;max-width:320px;border-radius:8px;border:1px solid var(--light-gray);">
+        </div>
+        <div class="field span-2">
+          <label style="display:flex;gap:10px;align-items:center;">
+            <input type="checkbox" id="pf-featured" style="width:17px;height:17px;accent-color:var(--navy);"> Featured project
+          </label>
+          <label style="display:flex;gap:10px;align-items:center;margin-top:8px;">
+            <input type="checkbox" id="pf-published" style="width:17px;height:17px;accent-color:var(--navy);"> Published (visible on public site)
+          </label>
+        </div>
+      </div>
+
+      <div id="gallery-section" style="display:none;margin-top:28px;">
+        <label style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);">Project Gallery</label>
+        <div class="grid grid--3" id="gallery-grid" style="margin-top:12px;"></div>
+        <input type="file" id="gallery-upload" accept="image/*" style="margin-top:12px;">
+      </div>
+
+      <div class="form-actions">
+        <a class="btn btn--outline" href="projects.html">Cancel</a>
+        <button class="btn btn--primary" type="submit" id="save-btn">Save Project</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+      if (!(await Admin.renderShell('projects', 'Project Form'))) return;
+      if (!Admin.allowed('projects')) { window.location.href = 'projects.html'; return; }
+
+      const id = new URLSearchParams(window.location.search).get('id');
+      const form = document.getElementById('project-form');
+      const saveBtn = document.getElementById('save-btn');
+
+      if (id) {
+        document.getElementById('form-title').textContent = 'Edit Project';
+        document.getElementById('gallery-section').style.display = '';
+        try {
+          // Admin fetch: list endpoint includes unpublished for admins
+          const list = await API.get(`/projects?limit=50&page=1&search=${''}`);
+          const p = list.data.find((x) => String(x.id) === id);
+          if (!p) throw new Error('Project not found');
+          form.title.value = p.title;
+          form.category.value = p.category;
+          form.location.value = p.location || '';
+          form.completionDate.value = p.completionDate || '';
+          form.services.value = (p.services || []).join(', ');
+          form.description.value = p.description || '';
+          form.challenge.value = p.challenge || '';
+          form.approach.value = p.approach || '';
+          form.result.value = p.result || '';
+          document.getElementById('pf-featured').checked = p.featured;
+          document.getElementById('pf-published').checked = p.published;
+          if (p.coverImageUrl) {
+            const img = document.getElementById('pf-cover-preview');
+            img.src = p.coverImageUrl; img.style.display = '';
+          }
+          renderGallery(p.gallery || []);
+        } catch (err) {
+          UI.toast(err.message, 'error');
+        }
+      }
+
+      function renderGallery(gallery) {
+        const grid = document.getElementById('gallery-grid');
+        grid.innerHTML = gallery.map((g) => `
+          <figure class="card" style="margin:0;position:relative;">
+            <div class="card-media"><img src="${UI.esc(g.imageUrl)}" alt="${UI.esc(g.caption || '')}"></div>
+            <button type="button" class="btn btn--sm btn--danger" data-del-img="${g.id}" style="position:absolute;top:8px;right:8px;">${Icons.svg('trash')}</button>
+          </figure>`).join('');
+        Icons.render(grid);
+        grid.querySelectorAll('[data-del-img]').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            try {
+              await API.del(`/projects/${id}/gallery/${btn.dataset.delImg}`);
+              UI.toast('Image removed.', 'success');
+              btn.closest('figure').remove();
+            } catch (err) { UI.toast(err.message, 'error'); }
+          });
+        });
+      }
+
+      document.getElementById('gallery-upload').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const fd = new FormData();
+        fd.append('image', file);
+        try {
+          await API.postForm(`/projects/${id}/gallery`, fd);
+          UI.toast('Image added.', 'success');
+          setTimeout(() => window.location.reload(), 500);
+        } catch (err) { UI.toast(err.message, 'error'); }
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        UI.setBusy(saveBtn, true, 'Saving…');
+        const fd = new FormData();
+        fd.append('title', form.title.value.trim());
+        fd.append('category', form.category.value);
+        fd.append('location', form.location.value.trim());
+        if (form.completionDate.value) fd.append('completionDate', form.completionDate.value);
+        fd.append('services', form.services.value);
+        fd.append('description', form.description.value);
+        fd.append('challenge', form.challenge.value);
+        fd.append('approach', form.approach.value);
+        fd.append('result', form.result.value);
+        fd.append('featured', document.getElementById('pf-featured').checked);
+        fd.append('published', document.getElementById('pf-published').checked);
+        const cover = document.getElementById('pf-cover').files[0];
+        if (cover) fd.append('coverImage', cover);
+
+        try {
+          if (id) await API.patchForm(`/projects/${id}`, fd);
+          else await API.postForm('/projects', fd);
+          UI.toast('Project saved.', 'success');
+          setTimeout(() => window.location.href = 'projects.html', 600);
+        } catch (err) {
+          UI.setBusy(saveBtn, false);
+          if (err.errors) UI.showFieldErrors(form, err.errors);
+          UI.toast(err.message || 'Unable to save the project.', 'error');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" fill="none">
+  <rect width="640" height="420" fill="#e9ebe6"/>
+  <!-- streets -->
+  <g stroke="#FFFFFF" stroke-width="14">
+    <path d="M0 120 H640 M0 260 H640 M140 0 V420 M330 0 V420 M500 0 V420"/>
+  </g>
+  <g stroke="#d7dad2" stroke-width="5">
+    <path d="M0 60 H640 M0 190 H640 M0 330 H640 M70 0 V420 M220 0 V420 M420 0 V420 M570 0 V420"/>
+  </g>
+  <!-- blocks -->
+  <g fill="#dfe3da">
+    <rect x="160" y="140" width="70" height="46" rx="4"/>
+    <rect x="250" y="140" width="60" height="46" rx="4"/>
+    <rect x="350" y="140" width="90" height="100" rx="4"/>
+    <rect x="160" y="280" width="90" height="60" rx="4"/>
+    <rect x="520" y="60" width="70" height="80" rx="4"/>
+  </g>
+  <!-- park -->
+  <rect x="60" y="210" width="60" height="90" rx="6" fill="#cfe0cf"/>
+  <!-- pin -->
+  <g transform="translate(320 190)">
+    <path d="M0 46 C-20 20 -26 8 -26 -8 a26 26 0 1 1 52 0 c0 16 -6 28 -26 54z" fill="#C7A56A"/>
+    <circle cx="0" cy="-8" r="11" fill="#172433"/>
+  </g>
+  <text x="320" y="286" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#344454">720 Commerce Street</text>
+</svg>

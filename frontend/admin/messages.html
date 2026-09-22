@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messages | SurveyPro Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <script defer src="/js/icons.js"></script>
+  <script defer src="/js/api.js"></script>
+  <script defer src="/js/ui.js"></script>
+  <script defer src="/js/admin.js"></script>
+</head>
+<body>
+  <div class="admin-topbar">
+    <div class="topbar-left"><h1>Messages</h1></div>
+    <div class="topbar-actions">
+      <select id="filter-status" aria-label="Filter by status" style="padding:9px 12px;border:1px solid var(--light-gray);border-radius:6px;font-family:var(--font);">
+        <option value="">All</option>
+        <option value="unread">Unread</option>
+        <option value="read">Read</option>
+        <option value="replied">Replied</option>
+        <option value="archived">Archived</option>
+      </select>
+    </div>
+  </div>
+  <div class="admin-content">
+    <div class="panel">
+      <div id="messages-table" style="padding:22px;"></div>
+      <div class="pagination" id="messages-pagination" style="padding-bottom:20px;"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+      if (!(await Admin.renderShell('messages', 'Messages'))) return;
+      const tableEl = document.getElementById('messages-table');
+      const state = { page: 1, status: '' };
+
+      async function load() {
+        tableEl.innerHTML = UI.loadingBlock('Loading messages…');
+        const params = new URLSearchParams({ page: state.page, limit: 15 });
+        if (state.status) params.set('status', state.status);
+        try {
+          const res = await API.get(`/messages?${params}`);
+          tableEl.innerHTML = Admin.table(
+            [
+              { label: 'From', width: '30%', render: (m) => `
+                <strong style="color:var(--navy);display:block;">${UI.esc(m.name)} ${m.status === 'unread' ? '<span class="badge badge--unread" style="margin-left:6px;">New</span>' : ''}</strong>
+                <span style="font-size:.8rem;color:var(--gray);">${UI.esc(m.email)}${m.phone ? ' · ' + UI.esc(m.phone) : ''}</span>` },
+              { label: 'Subject', render: (m) => UI.esc(m.subject || '—') },
+              { label: 'Received', render: (m) => UI.formatDateTime(m.createdAt) },
+              { label: 'Status', render: (m) => UI.statusBadge(m.status) },
+              { label: 'Actions', right: true, render: (m) => `
+                <div class="table-actions">
+                  <button class="btn btn--sm btn--outline" data-view="${m.id}">${Icons.svg('eye')}<span>Open</span></button>
+                  <button class="btn btn--sm btn--danger" data-del="${m.id}">${Icons.svg('trash')}</button>
+                </div>` }
+            ],
+            res.data,
+            { emptyTitle: 'No messages', emptyMessage: 'Contact form submissions will appear here.', emptyIcon: 'inbox' }
+          );
+          Icons.render(tableEl);
+          UI.renderPagination(document.getElementById('messages-pagination'), res, (p) => { state.page = p; load(); });
+
+          const byId = (id) => res.data.find((m) => String(m.id) === String(id));
+
+          tableEl.querySelectorAll('[data-view]').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+              const m = byId(btn.dataset.view);
+              const { overlay, close } = Admin.openModal(`Message from ${m.name}`, `
+                <div class="detail-grid" style="margin-bottom:18px;">
+                  <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value"><a href="mailto:${UI.esc(m.email)}">${UI.esc(m.email)}</a></div></div>
+                  <div class="detail-item"><div class="detail-label">Phone</div><div class="detail-value">${UI.esc(m.phone || '—')}</div></div>
+                  <div class="detail-item detail-item--full"><div class="detail-label">Subject</div><div class="detail-value">${UI.esc(m.subject || '—')}</div></div>
+                  <div class="detail-item detail-item--full"><div class="detail-label">Message</div><div class="detail-value" style="white-space:pre-wrap;">${UI.esc(m.message)}</div></div>
+                  <div class="detail-item detail-item--full"><div class="detail-label">Received</div><div class="detail-value">${UI.formatDateTime(m.createdAt)}</div></div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <button class="btn btn--sm btn--outline" data-status="replied">${Icons.svg('send')}<span>Mark Replied</span></button>
+                  <button class="btn btn--sm btn--outline" data-status="read">Mark Read</button>
+                  <button class="btn btn--sm btn--outline" data-status="archived">Archive</button>
+                  <a class="btn btn--sm btn--primary" href="mailto:${UI.esc(m.email)}?subject=Re: ${encodeURIComponent(m.subject || 'Your enquiry')}">Reply by Email</a>
+                </div>`, { wide: true });
+              overlay.querySelector('.modal-close').addEventListener('click', close);
+              overlay.querySelectorAll('[data-status]').forEach((sBtn) => {
+                sBtn.addEventListener('click', async () => {
+                  try {
+                    await API.patch(`/messages/${m.id}`, { status: sBtn.dataset.status });
+                    UI.toast('Message updated.', 'success');
+                    close();
+                    load();
+                    Admin.refreshPendingCount();
+                  } catch (err) { UI.toast(err.message, 'error'); }
+                });
+              });
+              // Auto-mark as read when opened
+              if (m.status === 'unread') {
+                API.patch(`/messages/${m.id}`, { status: 'read' }).then(() => Admin.refreshPendingCount()).catch(() => {});
+              }
+            });
+          });
+
+          tableEl.querySelectorAll('[data-del]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              Admin.confirmDialog('Delete this message permanently?', async () => {
+                try { await API.del(`/messages/${btn.dataset.del}`); UI.toast('Message deleted.', 'success'); load(); }
+                catch (err) { UI.toast(err.message, 'error'); }
+              });
+            });
+          });
+        } catch (err) {
+          tableEl.innerHTML = UI.emptyState('Unable to load messages', err.message, 'alert-triangle');
+        }
+      }
+
+      document.getElementById('filter-status').addEventListener('change', (e) => { state.status = e.target.value; state.page = 1; load(); });
+      load();
+    });
+  </script>
+</body>
+</html>

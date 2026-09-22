@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Services | SurveyPro Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <script defer src="/js/icons.js"></script>
+  <script defer src="/js/api.js"></script>
+  <script defer src="/js/ui.js"></script>
+  <script defer src="/js/admin.js"></script>
+</head>
+<body>
+  <div class="admin-topbar">
+    <div class="topbar-left"><h1>Services</h1></div>
+    <div class="topbar-actions">
+      <button class="btn btn--sm btn--primary" id="new-service">New Service</button>
+    </div>
+  </div>
+  <div class="admin-content">
+    <div class="panel">
+      <div id="services-table" style="padding:22px;"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+      if (!(await Admin.renderShell('services', 'Services'))) return;
+      const tableEl = document.getElementById('services-table');
+
+      const iconOptions = Icons.names.filter((n) =>
+        ['ruler', 'map', 'map-pin', 'compass', 'building-2', 'clipboard-list', 'layers', 'camera', 'crosshair', 'shield'].includes(n));
+
+      function serviceForm(svc) {
+        return `
+          <form id="service-form" novalidate>
+            <div class="form-grid">
+              <div class="field">
+                <label>Service Name <span class="required">*</span></label>
+                <input name="name" type="text" required maxlength="120" value="${UI.esc(svc ? svc.name : '')}">
+              </div>
+              <div class="field">
+                <label>Lucide Icon</label>
+                <select name="icon">
+                  ${iconOptions.map((n) => `<option value="${n}" ${svc && svc.icon === n ? 'selected' : ''}>${n}</option>`).join('')}
+                </select>
+              </div>
+              <div class="field span-2">
+                <label>Description</label>
+                <textarea name="description">${UI.esc(svc ? svc.description || '' : '')}</textarea>
+              </div>
+              <div class="field">
+                <label>Display Order</label>
+                <input name="displayOrder" type="number" min="0" value="${svc ? svc.displayOrder : 99}">
+              </div>
+              <div class="field">
+                <label>Status</label>
+                <select name="status">
+                  <option value="published" ${!svc || svc.status === 'published' ? 'selected' : ''}>Published</option>
+                  <option value="draft" ${svc && svc.status === 'draft' ? 'selected' : ''}>Draft</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn--outline" data-close>Cancel</button>
+              <button class="btn btn--primary" type="submit">Save Service</button>
+            </div>
+          </form>`;
+      }
+
+      function openForm(svc) {
+        const { overlay, close } = Admin.openModal(svc ? 'Edit Service' : 'New Service', serviceForm(svc), { wide: true });
+        overlay.querySelector('[data-close]').onclick = close;
+        const form = overlay.querySelector('#service-form');
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const btn = form.querySelector('button[type="submit"]');
+          UI.setBusy(btn, true, 'Saving…');
+          const payload = {
+            name: form.name.value.trim(),
+            icon: form.icon.value,
+            description: form.description.value,
+            displayOrder: parseInt(form.displayOrder.value, 10) || 0,
+            status: form.status.value
+          };
+          try {
+            if (svc) await API.patch(`/services/${svc.id}`, payload);
+            else await API.post('/services', payload);
+            UI.toast('Service saved.', 'success');
+            close();
+            load();
+          } catch (err) { UI.setBusy(btn, false); UI.toast(err.message, 'error'); }
+        });
+      }
+
+      async function load() {
+        tableEl.innerHTML = UI.loadingBlock('Loading services…');
+        try {
+          const res = await API.get('/services');
+          tableEl.innerHTML = Admin.table(
+            [
+              { label: 'Order', width: '60px', render: (s) => `<strong>${s.displayOrder}</strong>` },
+              { label: 'Service', render: (s) => `
+                <div style="display:flex;gap:12px;align-items:center;">
+                  <span class="feature-icon" style="width:38px;height:38px;margin:0;">${Icons.svg(UI.esc(s.icon || 'ruler'))}</span>
+                  <div><strong style="color:var(--navy);display:block;">${UI.esc(s.name)}</strong>
+                  <span style="font-size:.8rem;color:var(--gray);">/services#${UI.esc(s.slug)}</span></div>
+                </div>` },
+              { label: 'Bookings', render: (s) => s.bookingCount },
+              { label: 'Status', render: (s) => UI.statusBadge(s.status) },
+              { label: 'Actions', right: true, render: (s) => `
+                <div class="table-actions">
+                  <button class="btn btn--sm btn--outline" data-edit="${s.id}">${Icons.svg('pencil')}<span>Edit</span></button>
+                  <button class="btn btn--sm btn--danger" data-del="${s.id}" data-name="${UI.esc(s.name)}" data-count="${s.bookingCount}">${Icons.svg('trash')}</button>
+                </div>` }
+            ],
+            res.data,
+            { emptyTitle: 'No services', emptyMessage: 'Add your first surveying service.', emptyIcon: 'ruler' }
+          );
+          Icons.render(tableEl);
+
+          const byId = (id) => res.data.find((s) => String(s.id) === String(id));
+          tableEl.querySelectorAll('[data-edit]').forEach((btn) => btn.addEventListener('click', () => openForm(byId(btn.dataset.edit))));
+          tableEl.querySelectorAll('[data-del]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              if (parseInt(btn.dataset.count, 10) > 0) {
+                UI.toast('This service has bookings and cannot be deleted. Set it to draft instead.', 'warning');
+                return;
+              }
+              Admin.confirmDialog(`Delete service "${btn.dataset.name}"?`, async () => {
+                try { await API.del(`/services/${btn.dataset.del}`); UI.toast('Service deleted.', 'success'); load(); }
+                catch (err) { UI.toast(err.message, 'error'); }
+              });
+            });
+          });
+        } catch (err) {
+          tableEl.innerHTML = UI.emptyState('Unable to load services', err.message, 'alert-triangle');
+        }
+      }
+
+      document.getElementById('new-service').addEventListener('click', () => openForm(null));
+      load();
+    });
+  </script>
+</body>
+</html>

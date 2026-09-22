@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Surveying Services | SurveyPro</title>
+  <meta name="description" content="Boundary, topographical, construction, property, site and geospatial surveying services — delivered with licensed precision by SurveyPro.">
+  <link rel="canonical" href="/services">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <script defer src="/js/icons.js"></script>
+  <script defer src="/js/api.js"></script>
+  <script defer src="/js/ui.js"></script>
+  <script defer src="/js/partials.js"></script>
+  <script defer src="/js/navigation.js"></script>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <section class="page-hero">
+    <div class="container">
+      <span class="eyebrow">Services</span>
+      <h1>Surveying Services</h1>
+      <p>Precision measurement for every stage of your project — from first stake to final plat.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="grid grid--3" id="services-grid"></div>
+    </div>
+  </section>
+
+  <section class="section section--white">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Service Details</span>
+        <h2>What Each Survey Includes</h2>
+      </div>
+      <div id="service-details" style="display:grid;gap:18px;"></div>
+    </div>
+  </section>
+
+  <section class="section--navy section" style="text-align:center;">
+    <div class="container" style="max-width:640px;">
+      <h2>Not Sure Which Survey You Need?</h2>
+      <p style="color:#AEB9C4;">Describe your property and goals — our surveyors will recommend the right approach.</p>
+      <a class="btn btn--accent" href="/booking" style="margin-top:10px;">Request a Survey <i data-lucide="arrow-right"></i></a>
+    </div>
+  </section>
+
+  <div id="site-footer"></div>
+
+  <script defer src="/js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Service details accordion-style rows
+      const details = document.getElementById('service-details');
+      try {
+        const res = await API.get('/services');
+        details.innerHTML = (res.data || []).map((s) => `
+          <details class="card card--flat" id="${UI.esc(s.slug)}">
+            <summary style="display:flex;align-items:center;gap:14px;padding:20px 24px;cursor:pointer;font-weight:600;color:var(--navy);">
+              <span class="feature-icon" style="width:40px;height:40px;margin:0;">${Icons.svg(UI.esc(s.icon || 'ruler'))}</span>
+              ${UI.esc(s.name)}
+            </summary>
+            <div class="card-body" style="padding-top:0;">
+              <p>${UI.esc(s.description || '')}</p>
+              <a class="card-link" href="/booking">Book this survey ${Icons.svg('arrow-right')}</a>
+            </div>
+          </details>`).join('');
+        Icons.render(details);
+        // Deep link: /services#boundary-survey opens that item
+        if (window.location.hash) {
+          const target = document.querySelector(window.location.hash);
+          if (target && target.tagName === 'DETAILS') target.open = true;
+        }
+      } catch { details.innerHTML = ''; }
+    });
+  </script>
+</body>
+</html>

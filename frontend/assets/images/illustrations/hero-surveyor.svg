@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 560" fill="none">
+  <rect width="880" height="560" fill="#1d3040"/>
+  <!-- distant ridgeline -->
+  <path d="M0 380 L120 320 L260 370 L420 300 L600 360 L740 310 L880 350 V560 H0 Z" fill="#22384a"/>
+  <path d="M0 430 L180 390 L360 430 L560 380 L760 420 L880 400 V560 H0 Z" fill="#2a4256"/>
+  <!-- survey grid lines -->
+  <g stroke="#C7A56A" stroke-opacity=".35" stroke-width="1.4">
+    <path d="M60 470 V560 M200 470 V560 M340 470 V560 M480 470 V560 M620 470 V560 M760 470 V560"/>
+    <path d="M0 500 H880"/>
+  </g>
+  <!-- sun -->
+  <circle cx="710" cy="120" r="46" fill="#C7A56A" fill-opacity=".9"/>
+  <!-- tripod -->
+  <g stroke="#F7F7F4" stroke-width="7" stroke-linecap="round">
+    <path d="M440 480 L470 330"/>
+    <path d="M440 480 L404 336"/>
+    <path d="M440 480 L462 500"/>
+  </g>
+  <!-- total station -->
+  <g>
+    <rect x="418" y="292" width="52" height="34" rx="6" fill="#F7F7F4"/>
+    <rect x="426" y="270" width="36" height="24" rx="5" fill="#C7A56A"/>
+    <circle cx="444" cy="282" r="7" fill="#172433"/>
+    <path d="M468 282 h34" stroke="#F7F7F4" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="508" cy="282" r="5" fill="#C7A56A"/>
+  </g>
+  <!-- surveyor -->
+  <g fill="#F7F7F4">
+    <circle cx="330" cy="300" r="17"/>
+    <path d="M330 320 c-20 0 -30 16 -30 38 v70 h18 l4 -58 h16 l4 58 h18 v-70 c0 -22 -10 -38 -30 -38z"/>
+    <path d="M352 332 l38 -34 8 9 -38 34z"/>
+    <rect x="300" y="428" width="14" height="46" rx="6"/>
+    <rect x="346" y="428" width="14" height="46" rx="6"/>
+  </g>
+  <!-- measuring rod -->
+  <g>
+    <rect x="560" y="330" width="12" height="160" fill="#F7F7F4"/>
+    <path d="M560 350 h12 M560 375 h12 M560 400 h12 M560 425 h12 M560 450 h12" stroke="#C7A56A" stroke-width="5"/>
+    <circle cx="566" cy="322" r="9" fill="#C7A56A"/>
+  </g>
+  <!-- boundary markers -->
+  <g fill="#C7A56A">
+    <rect x="120" y="520" width="10" height="26" rx="2"/>
+    <rect x="420" y="524" width="10" height="26" rx="2"/>
+    <rect x="700" y="518" width="10" height="26" rx="2"/>
+  </g>
+</svg>

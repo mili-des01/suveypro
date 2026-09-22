@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" fill="none">
+  <rect width="640" height="400" fill="#2a4256"/>
+  <path d="M0 280 L140 230 L300 275 L470 215 L640 260 V400 H0 Z" fill="#22384a"/>
+  <!-- parcel grid -->
+  <g stroke="#C7A56A" stroke-width="2" stroke-opacity=".8">
+    <rect x="120" y="120" width="170" height="120" rx="4"/>
+    <rect x="330" y="100" width="190" height="140" rx="4"/>
+    <path d="M290 120 v120 M330 170 h190" stroke-dasharray="7 6"/>
+  </g>
+  <!-- monuments -->
+  <g fill="#F7F7F4">
+    <circle cx="120" cy="120" r="7"/><circle cx="290" cy="120" r="7"/>
+    <circle cx="290" cy="240" r="7"/><circle cx="120" cy="240" r="7"/>
+    <circle cx="330" cy="100" r="7"/><circle cx="520" cy="100" r="7"/>
+    <circle cx="520" cy="240" r="7"/><circle cx="330" cy="240" r="7"/>
+  </g>
+  <g fill="#C7A56A">
+    <circle cx="120" cy="120" r="3"/><circle cx="290" cy="240" r="3"/>
+    <circle cx="520" cy="100" r="3"/><circle cx="330" cy="240" r="3"/>
+  </g>
+  <path d="M60 350 h520" stroke="#C7A56A" stroke-width="3" stroke-dasharray="10 8"/>
+</svg>

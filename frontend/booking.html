@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request a Survey | SurveyPro</title>
+  <meta name="description" content="Request a professional land survey — boundary, topographical, construction and more. Submit your project details and our team will respond promptly.">
+  <link rel="canonical" href="/booking">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <script defer src="/js/icons.js"></script>
+  <script defer src="/js/api.js"></script>
+  <script defer src="/js/ui.js"></script>
+  <script defer src="/js/partials.js"></script>
+  <script defer src="/js/navigation.js"></script>
+  <script defer src="/js/booking.js"></script>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <section class="page-hero">
+    <div class="container">
+      <span class="eyebrow">Booking</span>
+      <h1>Request a Survey</h1>
+      <p>Four quick steps. Our team reviews every request and responds with next steps and scheduling options.</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:56px;">
+    <div class="container" style="max-width:860px;">
+
+      <!-- Wizard -->
+      <div id="booking-wizard">
+        <ol class="wizard-progress" aria-label="Booking progress">
+          <li><span class="wizard-step active"><span class="step-dot">1</span><span class="step-label">Your Information</span></span><span class="wizard-line"></span></li>
+          <li><span class="wizard-step"><span class="step-dot">2</span><span class="step-label">Project Details</span></span><span class="wizard-line"></span></li>
+          <li><span class="wizard-step"><span class="step-dot">3</span><span class="step-label">Schedule</span></span><span class="wizard-line"></span></li>
+          <li><span class="wizard-step"><span class="step-dot">4</span><span class="step-label">Review &amp; Submit</span></span></li>
+        </ol>
+
+        <form class="form-card" id="booking-form" novalidate>
+          <!-- STEP 1 -->
+          <fieldset class="wizard-pane active" aria-label="Your information">
+            <legend>Step 1 · Your Information</legend>
+            <div class="form-grid">
+              <div class="field">
+                <label for="bf-name">Full Name <span class="required">*</span></label>
+                <input id="bf-name" name="fullName" type="text" autocomplete="name" required maxlength="120">
+                <div class="field-error">Please enter your full name.</div>
+              </div>
+              <div class="field">
+                <label for="bf-email">Email <span class="required">*</span></label>
+                <input id="bf-email" name="email" type="email" autocomplete="email" required maxlength="180">
+                <div class="field-error">Please enter a valid email address.</div>
+              </div>
+              <div class="field">
+                <label for="bf-phone">Phone <span class="required">*</span></label>
+                <input id="bf-phone" name="phone" type="tel" autocomplete="tel" required maxlength="25">
+                <div class="field-error">Please enter a valid phone number.</div>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- STEP 2 -->
+          <fieldset class="wizard-pane" aria-label="Project details">
+            <legend>Step 2 · Project Details</legend>
+            <div class="form-grid">
+              <div class="field">
+                <label for="bf-service">Survey Service <span class="required">*</span></label>
+                <select id="bf-service" name="serviceId" required>
+                  <option value="">Select a service…</option>
+                </select>
+                <div class="field-error">Please choose a survey service.</div>
+              </div>
+              <div class="field">
+                <label for="bf-ptype">Property Type</label>
+                <select id="bf-ptype" name="propertyType">
+                  <option value="">Select…</option>
+                  <option>Residential</option>
+                  <option>Commercial</option>
+                  <option>Industrial</option>
+                  <option>Agricultural</option>
+                  <option>Government / Public</option>
+                </select>
+              </div>
+              <div class="field span-2">
+                <label for="bf-address">Property Address <span class="required">*</span></label>
+                <input id="bf-address" name="propertyAddress" type="text" autocomplete="street-address" required maxlength="300">
+                <div class="field-error">Please enter the property address.</div>
+              </div>
+              <div class="field">
+                <label for="bf-city">City / Area <span class="required">*</span></label>
+                <input id="bf-city" name="city" type="text" required maxlength="120">
+                <div class="field-error">Please enter the city or area.</div>
+              </div>
+              <div class="field">
+                <label for="bf-size">Estimated Property Size</label>
+                <input id="bf-size" name="propertySize" type="text" placeholder="e.g. 0.5 acre, 2,400 m²" maxlength="60">
+              </div>
+              <div class="field span-2">
+                <label for="bf-desc">Project Description</label>
+                <textarea id="bf-desc" name="description" maxlength="4000" placeholder="Tell us about your project, access constraints, deadlines, or anything else useful."></textarea>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- STEP 3 -->
+          <fieldset class="wizard-pane" aria-label="Preferred schedule">
+            <legend>Step 3 · Preferred Schedule</legend>
+            <div class="form-grid">
+              <div class="field">
+                <label for="bf-date">Preferred Date</label>
+                <input id="bf-date" name="preferredDate" type="date">
+              </div>
+              <div class="field">
+                <label for="bf-time">Preferred Time</label>
+                <select id="bf-time" name="preferredTime">
+                  <option value="">Any time</option>
+                  <option>Morning (8–11 AM)</option>
+                  <option>Midday (11 AM–2 PM)</option>
+                  <option>Afternoon (2–5:30 PM)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="bf-alt">Alternative Date</label>
+                <input id="bf-alt" name="alternativeDate" type="date">
+              </div>
+            </div>
+            <p class="hint" style="color:var(--gray);font-size:.85rem;margin-top:14px;">
+              Dates are preferences — final scheduling is confirmed by our team after review.
+            </p>
+          </fieldset>
+
+          <!-- STEP 4 -->
+          <fieldset class="wizard-pane" aria-label="Review and submit">
+            <legend>Step 4 · Review &amp; Submit</legend>
+            <dl class="review-list" id="review-summary"></dl>
+
+            <div class="field" style="margin-top:26px;">
+              <label for="booking-files"><i data-lucide="upload" style="width:15px;height:15px;display:inline-block;vertical-align:-2px;"></i> Attachments (optional)</label>
+              <input id="booking-files" type="file" multiple accept=".jpg,.jpeg,.png,.webp,.pdf">
+              <span class="hint">Up to 5 files · JPG, PNG, WEBP or PDF · max 10 MB each</span>
+              <div class="file-list" id="file-list"></div>
+            </div>
+          </fieldset>
+
+          <div class="wizard-nav">
+            <button type="button" class="btn btn--outline" id="wizard-back" style="visibility:hidden;">Back</button>
+            <button type="button" class="btn btn--primary" id="wizard-next">Next <i data-lucide="arrow-right"></i></button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Confirmation -->
+      <div id="booking-confirmation" class="form-card confirmation-panel" style="display:none;">
+        <div class="confirm-icon"><i data-lucide="check-circle"></i></div>
+        <h2>Booking Request Received</h2>
+        <p style="color:var(--gray);">Thank you, <strong id="confirm-name"></strong>. Our team will review your request and contact you shortly.</p>
+        <div class="booking-ref-box">
+          <div class="ref-label">Booking Reference</div>
+          <div class="ref-value" id="confirm-ref"></div>
+        </div>
+        <h3 style="font-size:1rem;">What happens next?</h3>
+        <ul style="text-align:left;list-style:none;padding:0;display:grid;gap:10px;margin:16px 0 26px;">
+          <li style="display:flex;gap:10px;"><i data-lucide="check" style="color:var(--success);width:18px;height:18px;flex:none;margin-top:3px;"></i> We review your request and verify property details</li>
+          <li style="display:flex;gap:10px;"><i data-lucide="check" style="color:var(--success);width:18px;height:18px;flex:none;margin-top:3px;"></i> A team member contacts you to confirm scope and pricing</li>
+          <li style="display:flex;gap:10px;"><i data-lucide="check" style="color:var(--success);width:18px;height:18px;flex:none;margin-top:3px;"></i> Your survey is scheduled and a surveyor is assigned</li>
+        </ul>
+        <a class="btn btn--primary" href="/">Back to Home</a>
+      </div>
+
+    </div>
+  </section>
+
+  <div id="site-footer"></div>
+</body>
+</html>

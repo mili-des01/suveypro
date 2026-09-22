@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Details | SurveyPro Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <script defer src="/js/icons.js"></script>
+  <script defer src="/js/api.js"></script>
+  <script defer src="/js/ui.js"></script>
+  <script defer src="/js/admin.js"></script>
+</head>
+<body>
+  <div class="admin-topbar">
+    <div class="topbar-left">
+      <a class="icon-btn" href="bookings.html" aria-label="Back to bookings"><i data-lucide="chevron-left"></i></a>
+      <h1>Booking Details</h1>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn--sm btn--danger" id="delete-booking" style="display:none;">Delete</button>
+    </div>
+  </div>
+  <div class="admin-content" id="booking-content">
+    <div class="loading-block"><i data-lucide="loader-circle"></i><span>Loading booking…</span></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+      if (!(await Admin.renderShell('bookings', 'Booking Details'))) return;
+      const id = new URLSearchParams(window.location.search).get('id');
+      const content = document.getElementById('booking-content');
+      if (!id) { content.innerHTML = UI.emptyState('No booking selected', 'Go back to bookings and pick one.', 'clipboard-list'); return; }
+
+      let surveyors = [];
+      try {
+        const users = await API.get('/users?limit=100');
+        surveyors = users.data.filter((u) => ['surveyor', 'manager'].includes(u.role) || u.role === 'admin');
+      } catch { /* staff roles cannot list users */ }
+
+      async function load() {
+        content.innerHTML = UI.loadingBlock('Loading booking…');
+        let b;
+        try {
+          b = (await API.get(`/bookings/${id}`)).booking;
+        } catch (err) {
+          content.innerHTML = UI.emptyState('Booking not found', err.message, 'alert-triangle');
+          return;
+        }
+
+        const canManage = Admin.allowed('bookings');
+        document.getElementById('delete-booking').style.display = Admin.user.role === 'admin' ? '' : 'none';
+        document.getElementById('delete-booking').onclick = () => {
+          Admin.confirmDialog(`Permanently delete booking ${b.bookingReference}? This cannot be undone.`, async () => {
+            try {
+              await API.del(`/bookings/${id}`);
+              UI.toast('Booking deleted.', 'success');
+              setTimeout(() => window.location.href = 'bookings.html', 600);
+            } catch (err) { UI.toast(err.message, 'error'); }
+          });
+        };
+
+        content.innerHTML = `
+          <div class="grid" style="grid-template-columns:1.6fr 1fr;align-items:start;">
+            <div>
+              <div class="panel">
+                <div class="panel-head">
+                  <div><h2>${UI.esc(b.bookingReference)}</h2><div class="panel-sub">Submitted ${UI.formatDateTime(b.createdAt)}</div></div>
+                  ${UI.statusBadge(b.status)}
+                </div>
+                <div class="panel-body">
+                  <div class="detail-grid">
+                    <div class="detail-item"><div class="detail-label">Client Name</div><div class="detail-value">${UI.esc(b.fullName)}</div></div>
+                    <div class="detail-item"><div class="detail-label">Phone</div><div class="detail-value"><a href="tel:${UI.esc(b.phone)}">${UI.esc(b.phone)}</a></div></div>
+                    <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value"><a href="mailto:${UI.esc(b.email)}">${UI.esc(b.email)}</a></div></div>
+                    <div class="detail-item"><div class="detail-label">Service</div><div class="detail-value">${UI.esc(b.serviceName || '—')}</div></div>
+                    <div class="detail-item"><div class="detail-label">Property Address</div><div class="detail-value">${UI.esc(b.propertyAddress)}</div></div>
+                    <div class="detail-item"><div class="detail-label">City / Area</div><div class="detail-value">${UI.esc(b.city)}</div></div>
+                    <div class="detail-item"><div class="detail-label">Property Type</div><div class="detail-value">${UI.esc(b.propertyType || '—')}</div></div>
+                    <div class="detail-item"><div class="detail-label">Estimated Size</div><div class="detail-value">${UI.esc(b.propertySize || '—')}</div></div>
+                    <div class="detail-item"><div class="detail-label">Preferred Date</div><div class="detail-value">${UI.formatDate(b.preferredDate)}</div></div>
+                    <div class="detail-item"><div class="detail-label">Preferred Time</div><div class="detail-value">${UI.esc(b.preferredTime || 'Any time')}</div></div>
+                    <div class="detail-item"><div class="detail-label">Alternative Date</div><div class="detail-value">${UI.formatDate(b.alternativeDate)}</div></div>
+                    <div class="detail-item"><div class="detail-label">Assigned Surveyor</div><div class="detail-value">${UI.esc(b.surveyorName || 'Unassigned')}</div></div>
+                    <div class="detail-item detail-item--full"><div class="detail-label">Project Description</div><div class="detail-value">${UI.esc(b.description || '—')}</div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-head"><h2>Attachments</h2></div>
+                <div class="panel-body">
+                  ${b.attachments && b.attachments.length ? `
+                    <div class="attachments-list">
+                      ${b.attachments.map((a) => `
+                        <div class="attachment-item">
+                          ${Icons.svg('file-text')}
+                          <span>${UI.esc(a.originalFilename)}</span>
+                          <span style="color:var(--gray);font-size:.8rem;">${UI.formatBytes(a.fileSize)}</span>
+                          <a href="${UI.esc(a.fileUrl)}" target="_blank" rel="noopener">Open ${Icons.svg('external-link')}</a>
+                        </div>`).join('')}
+                    </div>` : `<p style="color:var(--gray);margin:0;">No attachments were uploaded with this request.</p>`}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              ${canManage ? `
+              <div class="panel">
+                <div class="panel-head"><h2>Manage Booking</h2></div>
+                <div class="panel-body">
+                  <div class="field" style="margin-bottom:16px;">
+                    <label for="assign-surveyor">Assign Surveyor</label>
+                    <select id="assign-surveyor">
+                      <option value="">Unassigned</option>
+                      ${surveyors.map((u) => `<option value="${u.id}" ${b.assignedSurveyor === u.id ? 'selected' : ''}>${UI.esc(u.name)} (${UI.esc(u.role)})</option>`).join('')}
+                    </select>
+                  </div>
+                  <div class="field" style="margin-bottom:16px;">
+                    <label for="admin-notes">Admin Notes</label>
+                    <textarea id="admin-notes" style="min-height:90px;">${UI.esc(b.adminNotes || '')}</textarea>
+                  </div>
+                  <button class="btn btn--primary btn--block" id="save-details" style="margin-bottom:22px;">Save Details</button>
+
+                  <label style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray);">Status Actions</label>
+                  <div style="display:grid;gap:8px;margin-top:10px;">
+                    ${['confirmed', 'assigned', 'in_progress', 'completed', 'rescheduled', 'cancelled', 'rejected'].map((s) => `
+                      <button class="btn btn--sm ${b.status === s ? 'btn--primary' : 'btn--outline'}" data-status="${s}" style="justify-content:flex-start;">
+                        ${Icons.svg('check-circle')}<span style="text-transform:capitalize;">Mark ${s.replace('_', ' ')}</span>
+                      </button>`).join('')}
+                  </div>
+                </div>
+              </div>` : `
+              <div class="panel">
+                <div class="panel-head"><h2>Read-Only Access</h2></div>
+                <div class="panel-body"><p style="color:var(--gray);margin:0;">Your role can view bookings but not modify them.</p></div>
+              </div>`}
+            </div>
+          </div>`;
+        Icons.render(content);
+
+        if (canManage) {
+          document.getElementById('save-details').addEventListener('click', async (e) => {
+            UI.setBusy(e.currentTarget, true, 'Saving…');
+            try {
+              await API.patch(`/bookings/${id}`, {
+                assignedSurveyor: document.getElementById('assign-surveyor').value || null,
+                adminNotes: document.getElementById('admin-notes').value
+              });
+              UI.toast('Booking updated.', 'success');
+              load();
+            } catch (err) { UI.setBusy(e.currentTarget, false); UI.toast(err.message, 'error'); }
+          });
+
+          content.querySelectorAll('[data-status]').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+              try {
+                await API.patch(`/bookings/${id}`, { status: btn.dataset.status });
+                UI.toast(`Status updated to ${btn.dataset.status.replace('_', ' ')}.`, 'success');
+                load();
+              } catch (err) { UI.toast(err.message, 'error'); }
+            });
+          });
+        }
+      }
+
+      load();
+    });
+  </script>
+</body>
+</html>

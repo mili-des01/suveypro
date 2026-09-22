@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" fill="none">
+  <rect width="640" height="400" fill="#22384a"/>
+  <path d="M0 300 L200 260 L420 300 L640 255 V400 H0 Z" fill="#1d3040"/>
+  <!-- building grid elevation -->
+  <g fill="none" stroke="#F7F7F4" stroke-width="3">
+    <rect x="180" y="100" width="280" height="150" rx="4"/>
+  </g>
+  <g stroke="#C7A56A" stroke-width="2" stroke-opacity=".85">
+    <path d="M180 135 h280 M180 170 h280 M180 205 h280"/>
+    <path d="M250 100 v150 M320 100 v150 M390 100 v150"/>
+  </g>
+  <!-- as-built deviation markers -->
+  <g fill="#C7A56A">
+    <circle cx="250" cy="135" r="6"/>
+    <circle cx="390" cy="205" r="6"/>
+    <circle cx="320" cy="100" r="6"/>
+  </g>
+  <!-- crane hint -->
+  <g stroke="#F7F7F4" stroke-width="4" stroke-linecap="round">
+    <path d="M520 250 V120 M520 120 H420"/>
+  </g>
+  <path d="M60 340 h520" stroke="#C7A56A" stroke-width="3" stroke-dasharray="10 8"/>
+</svg>

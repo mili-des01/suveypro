@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clients | SurveyPro Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <script defer src="/js/icons.js"></script>
+  <script defer src="/js/api.js"></script>
+  <script defer src="/js/ui.js"></script>
+  <script defer src="/js/admin.js"></script>
+</head>
+<body>
+  <div class="admin-topbar">
+    <div class="topbar-left"><h1>Clients</h1></div>
+  </div>
+  <div class="admin-content">
+    <div class="panel">
+      <div class="toolbar">
+        <div class="search-box">
+          <i data-lucide="search"></i>
+          <input type="search" id="clients-search" placeholder="Search name, email or phone…" aria-label="Search clients">
+        </div>
+      </div>
+      <div id="clients-table" style="padding:0 22px 22px;"></div>
+      <div class="pagination" id="clients-pagination" style="padding-bottom:20px;"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+      if (!(await Admin.renderShell('clients', 'Clients'))) return;
+
+      const state = { page: 1, search: '' };
+      const tableEl = document.getElementById('clients-table');
+      let debounce;
+
+      async function load() {
+        tableEl.innerHTML = UI.loadingBlock('Loading clients…');
+        const params = new URLSearchParams({ page: state.page, limit: 15 });
+        if (state.search) params.set('search', state.search);
+        try {
+          const res = await API.get(`/clients?${params}`);
+          tableEl.innerHTML = Admin.table(
+            [
+              { label: 'Name', render: (c) => `<strong style="color:var(--navy);">${UI.esc(c.name)}</strong>` },
+              { label: 'Email', render: (c) => UI.esc(c.email || '—') },
+              { label: 'Phone', render: (c) => UI.esc(c.phone || '—') },
+              { label: 'Total Bookings', render: (c) => c.total_bookings },
+              { label: 'Completed', render: (c) => c.completed_bookings },
+              { label: 'Pending', render: (c) => c.pending_bookings },
+              { label: 'Last Booking', render: (c) => UI.formatDate(c.last_booking_at) },
+              { label: 'Actions', right: true, render: (c) => `<div class="table-actions"><button class="btn btn--sm btn--outline" data-view="${c.id}">${Icons.svg('eye')}<span>Profile</span></button></div>` }
+            ],
+            res.data,
+            { emptyTitle: 'No clients yet', emptyMessage: 'Clients are created automatically from bookings and messages.', emptyIcon: 'users' }
+          );
+          Icons.render(tableEl);
+          UI.renderPagination(document.getElementById('clients-pagination'), res, (p) => { state.page = p; load(); });
+
+          tableEl.querySelectorAll('[data-view]').forEach((btn) => {
+            btn.addEventListener('click', () => viewClient(parseInt(btn.dataset.view, 10)));
+          });
+        } catch (err) {
+          tableEl.innerHTML = UI.emptyState('Unable to load clients', err.message, 'alert-triangle');
+        }
+      }
+
+      async function viewClient(id) {
+        try {
+          const res = await API.get(`/clients/${id}`);
+          const c = res.client;
+          Admin.openModal(`Client Profile — ${c.name}`, `
+            <div class="detail-grid">
+              <div class="detail-item"><div class="detail-label">Name</div><div class="detail-value">${UI.esc(c.name)}</div></div>
+              <div class="detail-item"><div class="detail-label">Email</div><div class="detail-value">${UI.esc(c.email || '—')}</div></div>
+              <div class="detail-item"><div class="detail-label">Phone</div><div class="detail-value">${UI.esc(c.phone || '—')}</div></div>
+              <div class="detail-item"><div class="detail-label">Address</div><div class="detail-value">${UI.esc(c.address || '—')}</div></div>
+              <div class="detail-item"><div class="detail-label">Client Since</div><div class="detail-value">${UI.formatDate(c.created_at)}</div></div>
+            </div>
+            <h3 style="margin:22px 0 10px;font-size:.95rem;">Booking History</h3>
+            ${res.bookingHistory.length ? `
+              <div class="table-wrap"><table class="table" style="min-width:0;">
+                <thead><tr><th>Reference</th><th>Service</th><th>Date</th><th>Status</th></tr></thead>
+                <tbody>${res.bookingHistory.map((h) => `
+                  <tr><td>${UI.esc(h.booking_reference)}</td><td>${UI.esc(h.service_name || '—')}</td>
+                  <td>${UI.formatDate(h.created_at)}</td><td>${UI.statusBadge(h.status)}</td></tr>`).join('')}
+                </tbody></table></div>`
+              : '<p style="color:var(--gray);">No bookings recorded.</p>'}`,
+            { wide: true });
+        } catch (err) { UI.toast(err.message, 'error'); }
+      }
+
+      const searchInput = document.getElementById('clients-search');
+      searchInput.addEventListener('input', () => {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => { state.search = searchInput.value.trim(); state.page = 1; load(); }, 300);
+      });
+
+      load();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" fill="none">
+  <rect width="640" height="400" fill="#1d3040"/>
+  <circle cx="500" cy="110" r="42" fill="#C7A56A" fill-opacity=".9"/>
+  <path d="M0 300 L180 250 L380 300 L560 240 L640 280 V400 H0 Z" fill="#22384a"/>
+  <!-- drone -->
+  <g stroke="#F7F7F4" stroke-width="5" stroke-linecap="round">
+    <path d="M200 120 h90 M245 120 v16"/>
+    <circle cx="196" cy="120" r="12"/>
+    <circle cx="294" cy="120" r="12"/>
+  </g>
+  <rect x="231" y="136" width="28" height="20" rx="5" fill="#C7A56A"/>
+  <!-- scan cone -->
+  <path d="M245 158 L170 330 L320 330 Z" fill="#C7A56A" fill-opacity=".25"/>
+  <!-- terrain -->
+  <path d="M0 340 L120 310 L240 336 L380 300 L500 330 L640 306 V400 H0 Z" fill="#2a4256"/>
+  <g stroke="#F7F7F4" stroke-opacity=".5" stroke-width="2">
+    <path d="M120 348 v22 M300 352 v22 M470 346 v22"/>
+  </g>
+</svg>

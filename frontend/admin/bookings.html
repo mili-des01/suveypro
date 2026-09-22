@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookings | SurveyPro Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <script defer src="/js/icons.js"></script>
+  <script defer src="/js/api.js"></script>
+  <script defer src="/js/ui.js"></script>
+  <script defer src="/js/admin.js"></script>
+</head>
+<body>
+  <div class="admin-topbar">
+    <div class="topbar-left"><h1>Bookings</h1></div>
+    <div class="topbar-actions">
+      <select id="filter-status" aria-label="Filter by status" style="padding:9px 12px;border:1px solid var(--light-gray);border-radius:6px;font-family:var(--font);">
+        <option value="">All statuses</option>
+        <option value="pending">Pending</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="assigned">Assigned</option>
+        <option value="in_progress">In Progress</option>
+        <option value="completed">Completed</option>
+        <option value="rescheduled">Rescheduled</option>
+        <option value="cancelled">Cancelled</option>
+        <option value="rejected">Rejected</option>
+      </select>
+      <select id="filter-service" aria-label="Filter by service" style="padding:9px 12px;border:1px solid var(--light-gray);border-radius:6px;font-family:var(--font);">
+        <option value="">All services</option>
+      </select>
+    </div>
+  </div>
+  <div class="admin-content">
+    <div class="panel">
+      <div class="toolbar">
+        <div class="search-box">
+          <i data-lucide="search"></i>
+          <input type="search" id="bookings-search" placeholder="Search reference, client, phone, address…" aria-label="Search bookings">
+        </div>
+      </div>
+      <div id="bookings-table" style="padding:0 22px 22px;"></div>
+      <div class="pagination" id="bookings-pagination" style="padding-bottom:20px;"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+      if (!(await Admin.renderShell('bookings', 'Bookings'))) return;
+
+      const state = { page: 1, status: '', serviceId: '', search: '' };
+      const tableEl = document.getElementById('bookings-table');
+      const searchInput = document.getElementById('bookings-search');
+      let debounce;
+
+      // Populate service filter
+      try {
+        const services = await API.get('/services');
+        document.getElementById('filter-service').innerHTML =
+          '<option value="">All services</option>' +
+          services.data.map((s) => `<option value="${s.id}">${UI.esc(s.name)}</option>`).join('');
+      } catch { /* non-fatal */ }
+
+      async function load() {
+        tableEl.innerHTML = UI.loadingBlock('Loading bookings…');
+        const params = new URLSearchParams({ page: state.page, limit: 15 });
+        if (state.status) params.set('status', state.status);
+        if (state.serviceId) params.set('serviceId', state.serviceId);
+        if (state.search) params.set('search', state.search);
+        try {
+          const res = await API.get(`/bookings?${params}`);
+          tableEl.innerHTML = Admin.table(
+            [
+              { label: 'Reference', render: (b) => `<a href="booking-details.html?id=${b.id}" style="font-weight:600;color:var(--navy);">${UI.esc(b.bookingReference)}</a>` },
+              { label: 'Client', render: (b) => `${UI.esc(b.fullName)}<br><span style="font-size:.8rem;color:var(--gray);">${UI.esc(b.phone)}</span>` },
+              { label: 'Service', render: (b) => UI.esc(b.serviceName || '—') },
+              { label: 'Location', render: (b) => UI.esc(b.city) },
+              { label: 'Preferred Date', render: (b) => UI.formatDate(b.preferredDate) },
+              { label: 'Status', render: (b) => UI.statusBadge(b.status) },
+              { label: 'Actions', right: true, render: (b) => `<div class="table-actions"><a class="btn btn--sm btn--outline" href="booking-details.html?id=${b.id}">${Icons.svg('eye')}<span>View</span></a></div>` }
+            ],
+            res.data,
+            { emptyTitle: 'No bookings found', emptyMessage: 'Try adjusting filters or search.', emptyIcon: 'clipboard-list' }
+          );
+          Icons.render(tableEl);
+          UI.renderPagination(document.getElementById('bookings-pagination'), res, (p) => { state.page = p; load(); });
+        } catch (err) {
+          tableEl.innerHTML = UI.emptyState('Unable to load bookings', err.message, 'alert-triangle');
+        }
+      }
+
+      document.getElementById('filter-status').addEventListener('change', (e) => { state.status = e.target.value; state.page = 1; load(); });
+      document.getElementById('filter-service').addEventListener('change', (e) => { state.serviceId = e.target.value; state.page = 1; load(); });
+      searchInput.addEventListener('input', () => {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => { state.search = searchInput.value.trim(); state.page = 1; load(); }, 300);
+      });
+
+      load();
+    });
+  </script>
+</body>
+</html>

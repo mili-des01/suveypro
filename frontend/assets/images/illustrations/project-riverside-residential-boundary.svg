@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" fill="none">
+  <rect width="640" height="400" fill="#2a4256"/>
+  <path d="M0 280 L140 230 L300 275 L470 215 L640 260 V400 H0 Z" fill="#22384a"/>
+  <!-- residential lot grid -->
+  <g stroke="#C7A56A" stroke-width="2" stroke-opacity=".85">
+    <rect x="120" y="110" width="200" height="140" rx="4"/>
+    <path d="M220 110 v140 M120 180 h200" stroke-dasharray="7 6"/>
+  </g>
+  <!-- house footprint -->
+  <g fill="#F7F7F4">
+    <rect x="245" y="140" width="52" height="40" rx="3"/>
+    <path d="M240 140 L271 118 L302 140 Z"/>
+  </g>
+  <g fill="#F7F7F4">
+    <circle cx="120" cy="110" r="6"/><circle cx="320" cy="110" r="6"/>
+    <circle cx="320" cy="250" r="6"/><circle cx="120" cy="250" r="6"/>
+  </g>
+  <g fill="#C7A56A">
+    <circle cx="120" cy="110" r="2.6"/><circle cx="320" cy="250" r="2.6"/>
+  </g>
+  <path d="M60 330 h520" stroke="#C7A56A" stroke-width="3" stroke-dasharray="10 8"/>
+</svg>

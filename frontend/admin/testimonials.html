@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Testimonials | SurveyPro Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <script defer src="/js/icons.js"></script>
+  <script defer src="/js/api.js"></script>
+  <script defer src="/js/ui.js"></script>
+  <script defer src="/js/admin.js"></script>
+</head>
+<body>
+  <div class="admin-topbar">
+    <div class="topbar-left"><h1>Testimonials</h1></div>
+    <div class="topbar-actions">
+      <button class="btn btn--sm btn--primary" id="new-testimonial">New Testimonial</button>
+    </div>
+  </div>
+  <div class="admin-content">
+    <div class="panel">
+      <div id="testimonials-table" style="padding:22px;"></div>
+      <div class="pagination" id="testimonials-pagination" style="padding-bottom:20px;"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+      if (!(await Admin.renderShell('testimonials', 'Testimonials'))) return;
+      const tableEl = document.getElementById('testimonials-table');
+      const state = { page: 1 };
+
+      function form(t) {
+        return `
+          <form id="testimonial-form" novalidate>
+            <div class="form-grid">
+              <div class="field">
+                <label>Client Name <span class="required">*</span></label>
+                <input name="clientName" type="text" required maxlength="120" value="${UI.esc(t ? t.clientName : '')}">
+              </div>
+              <div class="field">
+                <label>Company</label>
+                <input name="company" type="text" maxlength="150" value="${UI.esc(t ? t.company || '' : '')}">
+              </div>
+              <div class="field">
+                <label>Rating</label>
+                <select name="rating">
+                  <option value="">—</option>
+                  ${[5, 4, 3, 2, 1].map((r) => `<option value="${r}" ${t && t.rating === r ? 'selected' : ''}>${r} star${r === 1 ? '' : 's'}</option>`).join('')}
+                </select>
+              </div>
+              <div class="field">
+                <label>Photo</label>
+                <input name="photo" type="file" accept="image/*">
+              </div>
+              <div class="field span-2">
+                <label>Testimonial <span class="required">*</span></label>
+                <textarea name="message" required>${UI.esc(t ? t.message : '')}</textarea>
+              </div>
+              <div class="field span-2">
+                <label style="display:flex;gap:10px;align-items:center;">
+                  <input type="checkbox" name="published" style="width:17px;height:17px;accent-color:var(--navy);" ${!t || t.published ? 'checked' : ''}> Published (visible on public site)
+                </label>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn--outline" data-close>Cancel</button>
+              <button class="btn btn--primary" type="submit">Save</button>
+            </div>
+          </form>`;
+      }
+
+      function openForm(t) {
+        const { overlay, close } = Admin.openModal(t ? 'Edit Testimonial' : 'New Testimonial', form(t), { wide: true });
+        overlay.querySelector('[data-close]').onclick = close;
+        const formEl = overlay.querySelector('#testimonial-form');
+        formEl.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const btn = formEl.querySelector('button[type="submit"]');
+          UI.setBusy(btn, true, 'Saving…');
+          const fd = new FormData();
+          fd.append('clientName', formEl.clientName.value.trim());
+          fd.append('company', formEl.company.value.trim());
+          fd.append('rating', formEl.rating.value);
+          fd.append('message', formEl.message.value.trim());
+          fd.append('published', formEl.published.checked);
+          const photo = formEl.photo.files[0];
+          if (photo) fd.append('photo', photo);
+          try {
+            if (t) await API.patchForm(`/testimonials/${t.id}`, fd);
+            else await API.postForm('/testimonials', fd);
+            UI.toast('Testimonial saved.', 'success');
+            close();
+            load();
+          } catch (err) { UI.setBusy(btn, false); UI.toast(err.message, 'error'); }
+        });
+      }
+
+      async function load() {
+        tableEl.innerHTML = UI.loadingBlock('Loading testimonials…');
+        const params = new URLSearchParams({ page: state.page, limit: 12 });
+        try {
+          const res = await API.get(`/testimonials?${params}`);
+          tableEl.innerHTML = Admin.table(
+            [
+              { label: 'Client', width: '45%', render: (t) => `
+                <strong style="color:var(--navy);display:block;">${UI.esc(t.clientName)}</strong>
+                <span style="font-size:.8rem;color:var(--gray);">${UI.esc(t.company || '—')}</span>
+                <p style="margin:6px 0 0;font-size:.86rem;color:var(--slate);">“${UI.esc(t.message.slice(0, 120))}${t.message.length > 120 ? '…' : ''}”</p>` },
+              { label: 'Rating', render: (t) => t.rating ? UI.stars(t.rating) : '—' },
+              { label: 'Status', render: (t) => UI.statusBadge(t.published ? 'published' : 'draft') },
+              { label: 'Actions', right: true, render: (t) => `
+                <div class="table-actions">
+                  <button class="btn btn--sm btn--outline" data-edit="${t.id}">${Icons.svg('pencil')}<span>Edit</span></button>
+                  <button class="btn btn--sm btn--outline" data-toggle="${t.id}" data-published="${t.published}">${t.published ? 'Unpublish' : 'Publish'}</button>
+                  <button class="btn btn--sm btn--danger" data-del="${t.id}" data-name="${UI.esc(t.clientName)}">${Icons.svg('trash')}</button>
+                </div>` }
+            ],
+            res.data,
+            { emptyTitle: 'No testimonials', emptyMessage: 'Add client testimonials to build trust.', emptyIcon: 'star' }
+          );
+          Icons.render(tableEl);
+          UI.renderPagination(document.getElementById('testimonials-pagination'), res, (p) => { state.page = p; load(); });
+
+          const byId = (id) => res.data.find((t) => String(t.id) === String(id));
+          tableEl.querySelectorAll('[data-edit]').forEach((btn) => btn.addEventListener('click', () => openForm(byId(btn.dataset.edit))));
+          tableEl.querySelectorAll('[data-toggle]').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+              try {
+                await API.patch(`/testimonials/${btn.dataset.toggle}`, { published: btn.dataset.published !== 'true' });
+                UI.toast('Testimonial updated.', 'success');
+                load();
+              } catch (err) { UI.toast(err.message, 'error'); }
+            });
+          });
+          tableEl.querySelectorAll('[data-del]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+              Admin.confirmDialog(`Delete testimonial from "${btn.dataset.name}"?`, async () => {
+                try { await API.del(`/testimonials/${btn.dataset.del}`); UI.toast('Testimonial deleted.', 'success'); load(); }
+                catch (err) { UI.toast(err.message, 'error'); }
+              });
+            });
+          });
+        } catch (err) {
+          tableEl.innerHTML = UI.emptyState('Unable to load testimonials', err.message, 'alert-triangle');
+        }
+      }
+
+      document.getElementById('new-testimonial').addEventListener('click', () => openForm(null));
+      load();
+    });
+  </script>
+</body>
+</html>

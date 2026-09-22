@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us | SurveyPro</title>
+  <meta name="description" content="Contact SurveyPro — office address, phone, email, business hours and enquiry form. We respond promptly to all enquiries.">
+  <link rel="canonical" href="/contact">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <script defer src="/js/icons.js"></script>
+  <script defer src="/js/api.js"></script>
+  <script defer src="/js/ui.js"></script>
+  <script defer src="/js/partials.js"></script>
+  <script defer src="/js/navigation.js"></script>
+  <script defer src="/js/contact.js"></script>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <section class="page-hero">
+    <div class="container">
+      <span class="eyebrow">Contact</span>
+      <h1>Get in Touch</h1>
+      <p>Questions about a property, a project timeline or which survey you need? We are here to help.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container grid grid--2" style="gap:48px;align-items:start;">
+      <!-- Info column -->
+      <div>
+        <h2>Office &amp; Hours</h2>
+        <div style="display:grid;gap:18px;margin:22px 0 32px;">
+          <div style="display:flex;gap:14px;">
+            <div class="feature-icon" style="width:44px;height:44px;margin:0;flex:none;"><i data-lucide="map-pin"></i></div>
+            <div>
+              <strong style="color:var(--navy);">Office Address</strong>
+              <p style="color:var(--gray);margin:2px 0 0;" id="contact-address">720 Commerce Street, Suite 210, Austin, TX 78701</p>
+            </div>
+          </div>
+          <div style="display:flex;gap:14px;">
+            <div class="feature-icon" style="width:44px;height:44px;margin:0;flex:none;"><i data-lucide="phone"></i></div>
+            <div>
+              <strong style="color:var(--navy);">Phone</strong>
+              <p style="color:var(--gray);margin:2px 0 0;" id="contact-phone">+1 (512) 555-0139</p>
+            </div>
+          </div>
+          <div style="display:flex;gap:14px;">
+            <div class="feature-icon" style="width:44px;height:44px;margin:0;flex:none;"><i data-lucide="mail"></i></div>
+            <div>
+              <strong style="color:var(--navy);">Email</strong>
+              <p style="color:var(--gray);margin:2px 0 0;" id="contact-email">info@surveypro.example.com</p>
+            </div>
+          </div>
+          <div style="display:flex;gap:14px;">
+            <div class="feature-icon" style="width:44px;height:44px;margin:0;flex:none;"><i data-lucide="clock"></i></div>
+            <div>
+              <strong style="color:var(--navy);">Business Hours</strong>
+              <p style="color:var(--gray);margin:2px 0 0;" id="contact-hours">Mon – Fri: 8:00 AM – 5:30 PM · Sat: 9:00 AM – 1:00 PM</p>
+            </div>
+          </div>
+        </div>
+        <img src="/assets/images/illustrations/map-placeholder.svg" alt="Map showing SurveyPro office location at 720 Commerce Street" style="border-radius:10px;border:1px solid var(--light-gray);" loading="lazy">
+      </div>
+
+      <!-- Form column -->
+      <div>
+        <div class="form-card">
+          <h2 style="font-size:1.4rem;">Send a Message</h2>
+          <p style="color:var(--gray);font-size:.92rem;">We typically respond within one business day.</p>
+          <form id="contact-form" novalidate>
+            <div class="form-grid" style="margin-top:18px;">
+              <div class="field">
+                <label for="cf-name">Full Name <span class="required">*</span></label>
+                <input id="cf-name" name="name" type="text" required maxlength="120">
+                <div class="field-error">Please enter your name.</div>
+              </div>
+              <div class="field">
+                <label for="cf-email">Email <span class="required">*</span></label>
+                <input id="cf-email" name="email" type="email" required maxlength="180">
+                <div class="field-error">Please enter a valid email.</div>
+              </div>
+              <div class="field">
+                <label for="cf-phone">Phone</label>
+                <input id="cf-phone" name="phone" type="tel" maxlength="25">
+                <div class="field-error">Please enter a valid phone number.</div>
+              </div>
+              <div class="field">
+                <label for="cf-subject">Subject</label>
+                <input id="cf-subject" name="subject" type="text" maxlength="200">
+              </div>
+              <div class="field span-2">
+                <label for="cf-message">Message <span class="required">*</span></label>
+                <textarea id="cf-message" name="message" required maxlength="4000"></textarea>
+                <div class="field-error">Please enter a message.</div>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn--primary" type="submit">Send Message <i data-lucide="send"></i></button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="site-footer"></div>
+
+  <script>
+    // Hydrate contact details from settings
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const res = await fetch('/api/dashboard/settings').then((r) => (r.ok ? r.json() : null));
+        if (res && res.settings) {
+          const s = res.settings;
+          if (s.contact_address) document.getElementById('contact-address').textContent = s.contact_address;
+          if (s.contact_phone) document.getElementById('contact-phone').textContent = s.contact_phone;
+          if (s.contact_email) document.getElementById('contact-email').textContent = s.contact_email;
+          if (s.contact_hours) document.getElementById('contact-hours').textContent = s.contact_hours;
+        }
+      } catch { /* defaults remain */ }
+    });
+  </script>
+</body>
+</html>

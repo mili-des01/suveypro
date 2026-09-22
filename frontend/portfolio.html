@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio | SurveyPro</title>
+  <meta name="description" content="Browse SurveyPro's completed surveying projects — residential, commercial, construction, land development, topographical and boundary surveys.">
+  <link rel="canonical" href="/portfolio">
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+  <script defer src="/js/icons.js"></script>
+  <script defer src="/js/api.js"></script>
+  <script defer src="/js/ui.js"></script>
+  <script defer src="/js/partials.js"></script>
+  <script defer src="/js/navigation.js"></script>
+  <script defer src="/js/main.js"></script>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <section class="page-hero">
+    <div class="container">
+      <span class="eyebrow">Portfolio</span>
+      <h1>Our Work</h1>
+      <p>Completed surveying projects across residential, commercial and public sectors.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center;margin-bottom:26px;">
+        <div class="toolbar" style="border:none;background:transparent;padding:0;border-radius:0;gap:8px;flex-wrap:wrap;" id="portfolio-filters">
+          <button class="btn btn--sm btn--primary active" data-category="">All</button>
+          <button class="btn btn--sm btn--outline" data-category="residential">Residential</button>
+          <button class="btn btn--sm btn--outline" data-category="commercial">Commercial</button>
+          <button class="btn btn--sm btn--outline" data-category="construction">Construction</button>
+          <button class="btn btn--sm btn--outline" data-category="land_development">Land Development</button>
+          <button class="btn btn--sm btn--outline" data-category="topographical">Topographical</button>
+          <button class="btn btn--sm btn--outline" data-category="boundary">Boundary</button>
+        </div>
+        <div class="search-box" style="position:relative;min-width:220px;">
+          <i data-lucide="search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--gray);"></i>
+          <input type="search" id="portfolio-search" placeholder="Search projects…" aria-label="Search projects"
+                 style="width:100%;padding:10px 12px 10px 38px;border:1px solid var(--light-gray);border-radius:6px;font-family:var(--font);font-size:.92rem;">
+        </div>
+      </div>
+
+      <div class="grid grid--3" id="portfolio-grid"></div>
+      <div class="pagination" id="portfolio-pagination"></div>
+    </div>
+  </section>
+
+  <section class="section--navy section" style="text-align:center;">
+    <div class="container" style="max-width:640px;">
+      <h2>Need Something Measured?</h2>
+      <p style="color:#AEB9C4;">Every project starts with a conversation about your property and goals.</p>
+      <a class="btn btn--accent" href="/booking" style="margin-top:10px;">Book a Survey <i data-lucide="arrow-right"></i></a>
+    </div>
+  </section>
+
+  <div id="site-footer"></div>
+</body>
+</html>

@@ -1,0 +1,63 @@
+/* ==========================================================================
+   SurveyPro — responsive
+   ========================================================================== */
+
+@media (max-width: 1199px) {
+  :root {
+    --pad-desktop: var(--pad-tablet);
+    --section-desktop: var(--section-tablet);
+  }
+  .grid--4 { grid-template-columns: repeat(2, 1fr); }
+  .grid--3 { grid-template-columns: repeat(2, 1fr); }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 767px) {
+  :root {
+    --pad-desktop: var(--pad-mobile);
+    --section-desktop: var(--section-mobile);
+  }
+
+  .grid--2, .grid--3, .grid--4 { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+  .footer-bottom { flex-direction: column; align-items: flex-start; }
+
+  /* Mobile nav */
+  .nav-toggle { display: inline-flex; }
+  .main-nav {
+    display: none; position: absolute; top: 100%; left: 0; right: 0;
+    background: var(--white); border-bottom: 1px solid var(--light-gray);
+    flex-direction: column; align-items: stretch; gap: 0; padding: 12px 0;
+    box-shadow: var(--shadow-md);
+  }
+  .main-nav.open { display: flex; }
+  .main-nav .nav-link { padding: 13px var(--pad-mobile); border-radius: 0; }
+  .main-nav .nav-link.active::after { display: none; }
+  .main-nav .btn { margin: 12px var(--pad-mobile) 6px; }
+  .site-header--transparent.is-scrolled, .site-header--transparent { background: var(--white); }
+  .site-header--transparent .nav-link, .site-header--transparent .logo-text { color: var(--navy); }
+  .site-header--transparent .nav-toggle { color: var(--navy); border-color: var(--light-gray); }
+  .site-header--transparent.is-scrolled .nav-link, .site-header--transparent.is-scrolled .logo-text { color: #E8EDF2; }
+  .site-header--transparent.is-scrolled .nav-toggle { color: var(--white); border-color: rgba(255,255,255,.3); }
+
+  .page-hero { padding: 72px 0 52px; }
+
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid .span-2 { grid-column: span 1; }
+  .form-card { padding: 22px 18px; }
+  .form-actions { flex-direction: column-reverse; }
+  .form-actions .btn { width: 100%; }
+
+  .wizard-progress { flex-wrap: wrap; row-gap: 12px; }
+  .wizard-step .step-label { display: none; }
+  .wizard-line { flex: 1; }
+
+  .review-list > div { grid-template-columns: 1fr; gap: 2px; }
+
+  .btn { width: auto; }
+  .btn--block { width: 100%; }
+}
+
+@media (max-width: 479px) {
+  .stat-value { font-size: 1.7rem; }
+}
