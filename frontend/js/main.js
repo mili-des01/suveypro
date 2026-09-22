@@ -64,7 +64,7 @@ const Main = {
             </a>
             <div class="card-body">
               <div class="card-meta" style="margin-bottom:10px;">
-                <span>${Icons.svg('briefcase')}${UI.esc(Main.categoryLabel(p.category))}</span>
+                <span>${Icons.svg('briefcase')}${UI.esc(UI.categoryLabel(p.category))}</span>
                 ${p.featured ? `<span class="badge badge--featured">${Icons.svg('star')}Featured</span>` : ''}
               </div>
               <h3>${UI.esc(p.title)}</h3>
@@ -88,10 +88,6 @@ const Main = {
     } catch {
       grid.innerHTML = UI.emptyState('Unable to load projects', 'Please refresh the page to try again.', 'alert-triangle');
     }
-  },
-
-  categoryLabel(cat) {
-    return { residential: 'Residential', commercial: 'Commercial', construction: 'Construction', land_development: 'Land Development', topographical: 'Topographical', boundary: 'Boundary' }[cat] || cat || '—';
   },
 
   initPortfolioFilters() {
@@ -137,7 +133,7 @@ const Main = {
       root.innerHTML = `
         <div class="breadcrumbs"><a href="/portfolio">Portfolio</a> <span>/</span> <span>${UI.esc(p.title)}</span></div>
         <div class="card-meta" style="margin-bottom:12px;">
-          <span class="badge badge--category">${UI.esc(Main.categoryLabel(p.category))}</span>
+          <span class="badge badge--category">${UI.esc(UI.categoryLabel(p.category))}</span>
           <span>${Icons.svg('map-pin')}${UI.esc(p.location || '—')}</span>
           <span>${Icons.svg('calendar-days')}${UI.formatDate(p.completionDate)}</span>
         </div>

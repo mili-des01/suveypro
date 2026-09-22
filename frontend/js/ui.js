@@ -65,6 +65,11 @@ const UI = {
     return `${(bytes / 1048576).toFixed(1)} MB`;
   },
 
+  /* ── Domain labels ── */
+  categoryLabel(cat) {
+    return { residential: 'Residential', commercial: 'Commercial', construction: 'Construction', land_development: 'Land Development', topographical: 'Topographical', boundary: 'Boundary' }[cat] || cat || '—';
+  },
+
   /* ── Badges (icon + color + text — never color alone) ── */
   statusBadge(status) {
     const map = {

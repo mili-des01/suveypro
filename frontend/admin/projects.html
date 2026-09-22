@@ -69,7 +69,7 @@
                   <div><strong style="color:var(--navy);display:block;">${UI.esc(p.title)}</strong>
                   <span style="font-size:.8rem;color:var(--gray);">${UI.esc(p.location || '—')}</span></div>
                 </div>` },
-              { label: 'Category', render: (p) => `<span class="badge badge--category">${UI.esc(Main.categoryLabel(p.category))}</span>` },
+              { label: 'Category', render: (p) => `<span class="badge badge--category">${UI.esc(UI.categoryLabel(p.category))}</span>` },
               { label: 'Completed', render: (p) => UI.formatDate(p.completionDate) },
               { label: 'Status', render: (p) => `
                 <div style="display:flex;gap:6px;flex-wrap:wrap;">
