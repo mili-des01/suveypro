@@ -13,10 +13,12 @@ async function findOrCreate({ name, email, phone, address }, client = null) {
     const { rows } = await q('SELECT * FROM clients WHERE lower(email) = lower($1) LIMIT 1', [email]);
     if (rows[0]) {
       // Update name/phone if they arrived empty before
+      // ($2/$3 are used in IS NOT NULL contexts where pg can't infer their
+      // type — explicit ::text casts avoid pg error 42P08.)
       await q(
         `UPDATE clients SET
-           name = CASE WHEN name IS NULL OR name = '' THEN $2 ELSE name END,
-           phone = CASE WHEN (phone IS NULL OR phone = '') AND $3 IS NOT NULL THEN $3 ELSE phone END,
+           name = CASE WHEN name IS NULL OR name = '' THEN $2::text ELSE name END,
+           phone = CASE WHEN (phone IS NULL OR phone = '') AND $3::text IS NOT NULL THEN $3::text ELSE phone END,
            updated_at = NOW()
          WHERE id = $1`,
         [rows[0].id, name || null, phone || null]
