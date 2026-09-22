@@ -56,6 +56,22 @@
 }
 .feature-icon svg { width: 24px; height: 24px; }
 
+/* ── Search box (input with leading icon) ── */
+.search-box { position: relative; }
+.search-box input { width: 100%; padding: 9px 12px 9px 36px; border: 1px solid var(--light-gray); border-radius: var(--radius); font-family: var(--font); font-size: .9rem; }
+.search-box > svg[data-inline-icon] {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  width: 15px !important; height: 15px !important; color: var(--gray); pointer-events: none;
+}
+
+/* ── Compact card grid (portfolio, recent jobs) ── */
+.grid--compact { gap: 16px; }
+.grid--compact .card-media { aspect-ratio: 16 / 9; }
+.grid--compact .card-body { padding: 14px 16px 16px; }
+.grid--compact .card-body h3 { font-size: .98rem; }
+.grid--compact .card-body p { font-size: .85rem; margin-bottom: 10px; }
+.grid--compact .card-meta { font-size: .76rem; gap: 10px; }
+
 /* ── Badges ── */
 .badge {
   display: inline-flex; align-items: center; gap: 6px;
