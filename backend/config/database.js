@@ -10,11 +10,17 @@ function getPool() {
     if (!environment.databaseUrl) {
       throw new Error('DATABASE_URL is not configured. Copy .env.example to .env and set it.');
     }
+    // Serverless platforms (e.g. Vercel) scale horizontally and need SSL —
+    // keep the pool small and reuse connections across invocations.
+    const isServerless = Boolean(process.env.VERCEL);
     pool = new Pool({
       connectionString: environment.databaseUrl,
-      max: 10,
+      max: isServerless ? 3 : 10,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000
+      connectionTimeoutMillis: 10000,
+      ssl: /sslmode=(disable|verify-full)/.test(environment.databaseUrl)
+        ? undefined
+        : { rejectUnauthorized: false }
     });
     pool.on('error', (err) => {
       console.error('[db] Unexpected pool error:', err.message);
